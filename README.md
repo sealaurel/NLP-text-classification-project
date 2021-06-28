@@ -1,164 +1,338 @@
-# Phase 4 Project
+![image](images/111744511_l.jpg)
+
+<center><b><font size="6">NLP Analysis of Boulder employers reviews</font></b></center>
+
+<br><br>
+
+
+## Business Problem
+
+Many companies struggle with analyzing answers to open-ended questions in their employees' surveys.
+While multiple-choice questions are straight-forward, they only anticipate answers that a surveyor
+wrote into the survey with a few predetermined responses. Multiple-choice questions are limited
+in a way that allows manipulating data by forcing a survey taker into specific categories of answers.
+Open-ended questions allow a person to describe an issue in their own words, highlighting their 
+concerns and opinions and providing additional details that otherwise might be missed.<br>
+However, open-ended questions provide a challenge for survey processors, especially in a situation 
+with a large volume of answers.<p>
+The Natural Language Processing approach is a logical approach to that problem. The goals of this project are<br>
+    
+1. Develop a predictive classification model of employer reviews from INDEED.com job search site.<br>
+2. Gain insight into factors affecting satisfaction or dissatisfaction of people with their employer.
+
+<br><br>
+
+## Data Description
+
+The data for this project has been obtained by scrapping INDEED job search site (https://www.indeed.com/companies/search?q=&l=80301&from=discovery-cmp). The search was limited to the 50 most popular companies in Boulder, CO area. INDEED limits the number of companies returned by a query (50). Some of these companies do not have any reviews; therefore, the final list of employers is:<br>
+1.	Ball Aerospace
+2.	University of Colorado Boulder
+3.	Boulder Valley School District
+4.	Boulder Community Health
+5.	Boulder County CO
+6.	Splunk
+7.	Naropa University
+8.	Amazon
+9.	Brookdale Senior Living
+10.	IBM
+11.	NETA
+12.	Apple
+13.	City of Boulder CO
+14.	Medtronic
+15.	Emerson
+16.	NetApp
+17.	Zayo Group
+18.	Whole Foods Market
+19.	Particle Measuring Systems
+20.	Boulder Medical Center
+21.	Sage Hospitality
+22.	University of Colorado
+23.	Mental Health Partners
+24.	Agilent Technologies
+25.	Frasier Meadows
+26.	Cozymeal
+27.	IHS Markit
+28.	National Renewable Energy Laboratory
+29.	University Corporation for Atmospheric Research
+30.	Sprouts Farmers Market
+31.	KPMG
+32.	New Relic
+33.	Excelitas Technologies
+34.	Northrop Grumman
+35.	KBI Biopharma
+36.	Ricoh
+37.	Embassy Suites by Hilton
+38.	U.S. Department of Commerce
+39.	InVitae
+40.	Pfizer
+41.	SUEZ
+42.	PetSmart
+43.	Craft Health
+44.	Imagine!
+45.	King Soopers
+46.	Safeway<br><br>
 
-Final phase down -- you're absolutely crushing it! You've made it all the way through one of the toughest phase of this course. You must have an amazing brain in your head!
+Almost 44% of the reviews belong to Amazon's former and current employees.
 
-<img src='https://raw.githubusercontent.com/learn-co-curriculum/dsc-phase-4-project/main/images/brain.gif'>
+Reviews of the companies are from all US states where the companies have operations. Not limiting reviews to the Boulder area only was made because the number of reviews from the limited geographic area is small and would affect a predictive ability of statistical models.
+The original dataset has 12620 records with four columns:
+<br><br>
+    1.Company name<br>
+    2.Unique review identifier<br>
+    3.Rating (on the scale between 1 and 5)<br>
+    4.Review text<br>
+    
+The original Rating scale has been changed to the 1-3 range to simplify the analysis. 1 corresponds to Negative reviews, 2-to Neutral reviews, and 3-to Positive reviews. Reviews with the original ratings 1 and 2 were lumped into the Negative category, reviews with the original rating 3 became the Neutral review category, and reviews with the original rating 4 and 5 were combined into a Positive review category.<br><br>
+The names of the companies were removed from the text of the reviews to make analysis non-company specific<br><br><br>
 
-## Project Overview
+# EDA
 
-For this phase, you will choose a project that requires building one of these four models:
+> Exploratory Data Analysis shows how overwhelmingly present Amazon reviews are in the dataset. In fact, Amazon reviews represent 44% of the total number of reviews
+<br><br>
+#### Distribution of Reviews
 
-- Time Series Modeling
-- Recommendation System
-- Image Classification with Deep Learning
-- Natural Language Processing
+![image](images/review_count_total.png)
 
-### The Data
+<br><br>
 
-We have provided a dataset suitable to each model, but you are also encouraged to source your own dataset. If you choose your own dataset, **run the dataset and business problem by your instructor for approval** before starting your project.
+> While Amazon reviews represent a big part of the overall corpus of the review, the split between the classes within Amazon chunk and the rest of the reviews is not that much different. The plot below shows that the percentage of positive reviews of Amazon is 3.5% lower than in all other employer reviews. It is not a very significant difference, but it's worth noting.
+<br>
+![png](images/pie_chart.png)
 
-### How to Choose a Project
+<br><br>
+> The plot above shows that most employers in the area have more positive reviews than negative ones, with a few outliers mostly among small employers with very few reviews (less than 50).
+<br>
+![png](images/employer_review_bar_chart.png)
 
-When choosing a project, consider:
+<br><br>   
 
-1. **Depth:** Choose a project that similar to what you want to do for your capstone project (Phase 5). This will allow you to practice those methods in a group setting before needing to use it independently. This will help you build a better Capstone project and a portfolio that demonstrates the ability to deeply learn and implement one modeling approach.
+### Venn diagrams of negative, positive and neutral reviews unique word subsets
 
-2. **Breadth:** Choose a problem that you don't necessarily plan to use in your capstone project. This will allow you to develop applied experience with multiple modeling approaches. This will help you refine your areas of interest and build a portfolio that demonstrates the ability to learn and implement multiple modeling approaches.
 
-If you are feeling overwhelmed or behind, we recommend you choose Problem \#3: Image Classification with Deep Learning.
+![png](images/venn_diagram.png)
 
-### Problem 1: Time Series Modeling
 
-If you choose the Time Series option, you will be forecasting real estate prices of various zip codes using data from [Zillow Research](https://www.zillow.com/research/data/). For this project, you will be acting as a consultant for a fictional real-estate investment firm. The firm has asked you what seems like a simple question:
+> The Venn diagram shows a significant overlap between negative, positive, and neutral word subsets. Given the numbers, it is fair to expect that Positive reviews will be most easily identifiable, while Neutral reviews will be most challenging to identify.
 
-> What are the top 5 best zip codes for us to invest in?
+<br><br>
 
-This may seem like a simple question at first glance, but there's more than a little ambiguity here that you'll have to think through in order to provide a solid recommendation. Should your recommendation be focused on profit margins only? What about risk? What sort of time horizon are you predicting against?  Your recommendation will need to detail your rationale and answer any sort of lingering questions like these in order to demonstrate how you define "best".
+### Word Clouds of negative, positive and neutral reviews:
+<br>
 
-There are many datasets on the [Zillow Research Page](https://www.zillow.com/research/data/), and making sure you have exactly what you need can be a bit confusing. For simplicity's sake, we have already provided the dataset for you in this repo -- you will find it in the file `time-series/zillow_data.csv`.
+> The workclouds are just visualization tools and do not represent the importance of the words for statistical models. However, they signify the frequency of the words used in a particular context. In this case, it's the frequency of the words used in negative, positive, and neutral reviews. The wordclouds above show that the most frequent words used in the negative and neutral reviews are 'employee' and 'manager,' while in positive reviews, words are more diverse. I will perform a similar assessment after the modeling part.
 
-The goal of this project is to have you complete a very common real-world task in regard to time series modeling. However, real world problems often come with a significant degree of ambiguity, which requires you to use your knowledge of statistics and data science to think critically about and answer. While the main task in this project is time series modeling, that isn't the overall goal -- it is important to understand that time series modeling is a tool in your toolbox, and the forecasts it provides you are what you'll use to answer important questions.
 
-In short, to pass this project, demonstrating the quality and thoughtfulness of your overall recommendation is at least as important as successfully building a time series model!
+!<center>![png](images/wordclouds.png)</center>
+<br><br>
 
-#### Starter Jupyter Notebook
+## Pre-processing
 
-For this project, you will be provided with a Jupyter notebook, `time-series/starter_notebook.ipynb`, containing some starter code. If you inspect the Zillow dataset file, you'll notice that the datetimes for each sale are the actual column names -- this is a format you probably haven't seen before. To ensure that you're not blocked by preprocessing, we've provided some helper functions to help simplify getting the data into the correct format. You're not required to use this notebook or keep it in its current format, but we strongly recommend you consider making use of the helper functions so you can spend your time working on the parts of the project that matter.
+### Tokenization with Lemmatization
+<br>
 
-#### Evaluation
+> I tested several tokenizers (RegExpTokenizer,TreebankWordTokenizer and my own Tokenizer class) in conjunction with WordNetLemmatizer. RegExpTokenizer/WordNetLemmatizer combination generated the best results in terms of minimizing the number of unique tokens and computational time. Stop_words set was customized (please see details in the code)
 
-In addition to deciding which quantitative metric(s) you want to target (e.g. minimizing mean squared error), you need to start with a definition of "best investment".  Consider additional metrics like risk vs. profitability, or ROI yield.
+<br>
 
-### Problem 2: Recommendation System
+### Vectorization
+<br>
 
-If you choose the Recommendation System option, you will be making movie recommendations based on the [MovieLens](https://grouplens.org/datasets/movielens/latest/) dataset from the GroupLens research lab at the University of Minnesota.  Unless you are planning to run your analysis on a paid cloud platform, we recommend that you use the "small" dataset containing 100,000 user ratings (and potentially, only a particular subset of that dataset).
+> Two vectorized datasets were generated. One was using CountVectorizer and the other one - TfIdfVectorizer. Each of the datasets contained 46962 feature columns
 
-Your task is to:
+<br><br>
 
-> Build a model that provides top 5 movie recommendations to a user, based on their ratings of other movies.
 
-The MovieLens dataset is a "classic" recommendation system dataset, that is used in numerous academic papers and machine learning proofs-of-concept.  You will need to create the specific details about how the user will provide their ratings of other movies, in addition to formulating a more specific business problem within the general context of "recommending movies".
+# Modeling
+<br>
 
-#### Collaborative Filtering
+## Models
+> Several classifiers were tested: MultinomialNBClassifier, XGBoostClassifier and LogisticRegressionCVClassifier. As the first step I tested them with default hyperparameters and then ran a gridsearch for each of the models. 
 
-At minimum, your recommendation system must use collaborative filtering.  If you have time, consider implementing a hybrid approach, e.g. using collaborative filtering as the primary mechanism, but using content-based filtering to address the [cold start problem](https://en.wikipedia.org/wiki/Cold_start_(computing)).
+None of the models with default hyperparameters performed remarkably well:
+* MultinomialNB model with CountVectoried dataset was very fast but performed slightly worse than LogisticRegression models (both count-vectorized and tdidf-vectorized) in terms of accuracy
+* MultinomialNB model has the best ability to identify Neutral reviews, which seems to be a problem for other models.
+* Logistic regression models took the most time to train but produced better results.
+* MultinomialNB model does not have many parameters to tune the model except the alpha smoothing parameter
+* Logistic regression can be tuned up on many more parameters, but the time running each variation might become prohibitive.
+* XGBClassifier models (both count-vectorized and tdidf-vectorized) performed slightly worse than MultinomialNB model. However, XGBCalssifier has more hyperparameters to tune it and therefore might be a good candidate for a grid search considering the relatively short time to run the fit.
+<br><br>
 
-#### Evaluation
+> Gridsearch results:
 
-The MovieLens dataset has explicit ratings, so achieving some sort of evaluation of your model is simple enough.  But you should give some thought to the question of metrics. Since the rankings are ordinal, we know we can treat this like a regression problem.  But when it comes to regression metrics there are several choices: RMSE, MAE, etc.  [Here](http://fastml.com/evaluating-recommender-systems/) are some further ideas.
+The best performing models are 
 
-### Problem 3: Image Classification with Deep Learning
+* LogRegressionCV model with TfIdfVectorizerwith best gridsearch hyperparameters<br>
+* MNBClassifier model with CountVectorizer with best gridsearch hyperparameters
+* Both models use the same full features dataset
 
-If you choose this option, you'll put everything you've learned together to build a deep neural network that trains on a large dataset for classification on a non-trivial task.  In this case, using x-ray images of pediatric patients to identify whether or not they have pneumonia.  The dataset comes from Kermany et al. on [Mendeley](https://data.mendeley.com/datasets/rscbjbr9sj/3), although there is also a version on [Kaggle](https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia) that may be easier to use.
+<br><br>
 
-Your task is to:
+> Reduction of Features, addition of bigrams
 
-> Build a model that can classify whether a given patient has pneumonia, given a chest x-ray image.
+By omitting words that are used in more than 99% of the reviews and in less than 1% of the reviews and adding bigrams to the features the number of the dimentions was reduced to 406 features
 
-#### Aim for a Proof of Concept
+1.  The best MNB model with 406 features is much less over-fitted though the performance dropped a bit.
 
-With Deep Learning, data is king -- the more of it, the better. However, the goal of this project isn't to build the best model possible -- it's to demonstrate your understanding by building a model that works. You should try to avoid datasets and model architectures that won't run in reasonable time on your own machine. For many problems, this means downsampling your dataset and only training on a portion of it. Once you're absolutely sure that you've found the best possible architecture and other hyperparameters for your model, then consider training your model on your entire dataset overnight (or, as larger portion of the dataset that will still run in a feasible amount of time).
+2.  LRCV best parameters models with 406 features display much less over-fitting than the similar model with the full features set. Its' performance dropped slightly. The fact of low over-fitting level makes it the best model so far.
 
-At the end of the day, we want to see your thought process as you iterate and improve on a model. A project that achieves a lower level of accuracy but has clearly iterated on the model and the problem until it found the best possible approach is more impressive than a model with high accuracy that did no iteration. We're not just interested in seeing you finish a model -- we want to see that you understand it, and can use this knowledge to try and make it even better!
+## Final testing 
 
-#### Evaluation
+<br>
 
-Evaluation is fairly straightforward for this project.  But you'll still need to think about which metric to use and about how best to cross-validate your results.
+Confusion matrix for the final MNB model:
+<br>
+![png](images/mnb_final.png)
+<br><br>
 
-### Problem 4: Natural Language Processing (NLP)
+Confusion matrix for the final LRCV model:
+<br>
+![png](images/lrcv_final.png)
+<br>
 
-If you choose this option, you'll build an NLP model to analyze Twitter sentiment about Apple and Google products. The dataset comes from CrowdFlower via [data.world](https://data.world/crowdflower/brands-and-product-emotions). Human raters rated the sentiment in over 9,000 Tweets as positive, negative, or neither.
+> MNB model has a better ability to identify positive reviews but fails miserably to identify neutral reviews. LRCV model has a more balanced performance and is the least over-fitted.
 
-Your task is to:
+<br><br>
 
-> Build a model that can rate the sentiment of a Tweet based on its content.
+# iNterpret
 
-#### Aim for a Proof of Concept
+## Feature Importance
+<br>
+LRCV full feature set
 
-There are many approaches to NLP problems - start with something simple and iterate from there. For example, you could start by limiting your analysis to positive and negative Tweets only, allowing you to build a binary classifier. Then you could add in the neutral Tweets to build out a multiclass classifier. You may also consider using some of the more advanced NLP methods in the Mod 4 Appendix.
+![png](images/LRCV_full_feature_importance.png)
 
-#### Evaluation
+<br>
+LRCV reduced feature set
 
-Evaluating multiclass classifiers can be trickier than binary classifiers because there are multiple ways to mis-classify an observation, and some errors are more problematic than others. Use the business problem that your NLP project sets out to solve to inform your choice of evaluation metrics.
+![png](images/LRCV_reduced_feature_importance.png)
 
-### Sourcing Your Own Data
+> Both LRCV models (full and reduced feature sets) demonstrate the importance of emotionally charged words like horrible and awesome.
 
-Sourcing new data is a valuable skill for data scientists, but it requires a great deal of care. An inappropriate dataset or an unclear business problem can lead you spend a lot of time on a project that delivers underwhelming results. The guidelines below will help you complete a project that demonstrates your ability to engage in the full data science process.
+<br>
+MNB reduced feature set
 
-Your dataset must be...
+![png](images/MNB_reduced_feature_importance.png)
 
-1. **Appropriate for one of this project's models.** These are time series, recommendation systems, deep learning, or natural language processing.   
+> MNB model feature importance demonstrates the same tendency though it puts more importance on emotionally charged words with positive connotations.
 
-2. **Usable to solve a specific business problem.** This solution must rely on your model.
+<br><br>
 
-3. **Somewhat complex.** It should contain thousands of rows and features that require creativity to use.
 
-4. **Unfamiliar.** It can't be one we've already worked with during the course or that is commonly used for demonstration purposes (e.g. MNIST).
+# Conclusions and recommendations
 
-5. **Manageable.** Stick to datasets that you can model using the techniques introduced in Phase 4.
+## Conclusions
 
-Once you've sourced your own dataset and identified the business problem you want to solve with it, you must to **run them by your instructor for approval**.
+<span style="font-size:1.2em;">This project had two goals:</span><br>
+* Developing a predictive classification model of employer review rating
+* Gaining insight into factors affecting satisfaction or dissatisfaction of people with their employer.<br><br>
 
-#### Problem First, or Data First?
+<span style="font-size:1.2em;">The project results are:</span><br>
 
-There are two ways that you can source your own dataset: **_Problem First_** or **_Data First_**. The less time you have to complete the project, the more strongly we recommend a Data First approach to this project.
+* Two models with relatively good predictive power were built. Both top models were better at predicting positive and negative reviews while predicting neutral reviews appears to be more difficult.<br>
+* Understanding that the most influential factors affecting employees' opinions are a human factor (surrounding people, primarily management) and time.<br><br><br>
+* * * 
+<br>
+<span style="font-size:1.2em;">The models:</span><br>
 
-**_Problem First_**: Start with a problem that you are interested in that you could potentially solve using one of the four project models. Then look for data that you could use to solve that problem. This approach is high-risk, high-reward: Very rewarding if you are able to solve a problem you are invested in, but frustrating if you end up sinking lots of time in without finding appropriate data. To mitigate the risk, set a firm limit for the amount of time you will allow yourself to look for data before moving on to the Data First approach.
+* The best performing models are Logistic Regression model and the Multinomial Naive Bayes model. Their performance F1-macro score metrics were 0.55 and 0.56, respectively. The baseline DummyClassifier model has the same metrics at 0.25. The improvement is very prominent.<br><br>
+* Multinomial Naive Bayes model displayed better performance in identifying positive reviews, while the Logistic Regression model demonstrated a better ability to distinguish between all three classes.<br><br>
+* Both of the models used reduced wordsets with 406. The reduced word set was used for two reasons: to reduce the overfitting of the models and to minimize computational time. Training an LRCV classifier with the full wordset of 47281 unique words overwhelmed the computational resources and generated an over-fitted model.
 
-**_Data First_**: Take a look at some of the most popular internet repositories of cool data sets we've listed below. If you find a data set that's particularly interesting for you, then it's totally okay to build your problem around that data set.
+<br><br>
 
-There are plenty of amazing places that you can get your data from. We recommend you start looking at data sets in some of these resources first:
+<span style="font-size:1.2em;">The Importance of Models' Predictors:</span>  <br><br>
 
-* [UCI Machine Learning Datasets Repository](https://archive.ics.uci.edu/ml/datasets.php)
-* [Kaggle Datasets](https://www.kaggle.com/datasets)
-* [Awesome Datasets Repo on Github](https://github.com/awesomedata/awesome-public-datasets)
+* Both models identified powerfully emotionally charged words as the best predictors of a class a review belongs to. 
+* Words
+ 1. horrible
+ 2. terrible
+ 3. poor
+ 
+ 
+> are the three most influential predictors of a review belonging to a negative class.
 
-## The Deliverables
+* Words
+ 1. great
+ 2. awesome
+ 3. excellent 
+ 
+> are the three most influential predictors of a review belonging to a positive class.
 
-There are three deliverables for this project:
+* That fact makes it challenging to identify neutral reviews correctly. Neutral reviews usually have both trends or none at all. If people don't experience intense emotions, they are less likely to use emotionally charged words.
 
-* A **GitHub repository**
-* A **Jupyter Notebook**
-* A **non-technical presentation**
+    * An example of Neutral review with the word 'horrible':
+    
+    >Had a horrible experience working there. I got sick while working there, took a medical leave to take care of myself after working all through peak season, then got terminated because they are horrible with communication and resolving issues. Would never recommend anyone to work there.<br>
+    
+    * While the content of this review seems to be pretty negative, the reviewer rated it as a neutral one<br><bR>
+    
+    * An example of a Neutral review  with the word 'excellent':
+        >IBM has been a great place for me to learn and grow. The job variety was awesome. This allowed me to make excellent contributions to every team to which I belonged. This opportunity still exists, but is usually in the low cost countries.
+    * The content of this review is a positive one, but it has a negative part. It is not related to the company per se but more to a global tendency of shifting jobs overseas.<br><br>
 
-Review the "Project Submission & Review" page in the "Milestones Instructions" topic for instructions on creating and submitting your deliverables. Refer to the rubric associated with this assignment for specifications describing high-quality deliverables.
 
-### Key Points
+* The fact that neutral class reviews are more difficult to identify might also be related to a psychological tendency of people to be polite unless they are agitated. The argument in favor of that theory is that both models misclassify neutral reviews as positive more frequently than misclassify them as negative.
+    * The first model identified neutral reviews correctly only in 22.5% of all cases. It misclassified them as positive in 52% of all cases and as negative in 25.3%. 
+    * The second model did a better job correctly identifying neutral reviews; it identified them correctly in 40.6% of all cases and misclassified them as positive in 31.2% of the cases and as negative in 28.2% of the cases.
+<br><br>
 
-* **Choose your project quickly.** We've given you a lot of choices - don't get stuck spending too much time choosing which project to do. Give yourself a firm time limit for picking a project (e.g. 2 hours) so you can get on with making something great. Don't worry about picking the perfect project - remember that you will get to do a new, larger Capstone project very soon!
+<span style="font-size:1.2em;">The most influential factors affecting employees' opinion of a company:</span>  <br><br>
+* The concept of "time" is broad. Based on the spot check analysis of reviews with the word "time" in the body of a review, it can be in the context of:
+        1. a full-/part- time job
+        2. time-off
+        3. time-management
+        4. employee's time with a company
+        5. etc.
 
-* **Your Jupyter Notebook should demonstrate an iterative approach to modeling.** This means that you begin with a basic model, evaluate it, and then provide justification for and proceed to a new model. This is a great way to add narrative structure to your notebook, especially if you compare model performance across each iteration.
 
-* **You must choose and implement an appropriate validation strategy.** This is one of the trickiest parts of machine learning models, especially for models that don't lend themselves easily to traditional cross-validation (e.g. time series & recommendation systems).
+>It does not appear that word 'time' is more prevalent in any one class, but it does seem to be on people's minds frequently either positively or negatively.
+    
+![image benefit_freq](images/time.png)
 
-## Getting Started
 
-Create a new repository for your project to get started. We recommend structuring your project repository similar to the structure in [the Phase 1 Project Template](https://github.com/learn-co-curriculum/dsc-project-template). You can do this either by creating a new fork of that repository to work in or by building a new repository from scratch that mimics that structure.
+* Words "manage," "management," and "manager" come up in negative reviews almost twice as frequently as in positive reviews. 
 
-## Project Submission and Review
+![image manager_freq](images/management.png)
 
-Review the "Project Submission & Review" page in the "Milestones Instructions" topic to learn how to submit your project and how it will be reviewed. Your project must pass review for you to progress to the next Phase.
+* That implies that if a person has a negative opinion of an employer, it is most probably related to a bad relationship with their manager(s). Even the word "pay" is not as frequent in negative reviews as the words "manager"/"management/"manage" (combined) are.
+ While the word "benefit" seemingly affects a negative opinion much less than one could expect, it is more frequent in positive reviews than in negative ones.
 
-## Summary
+![image benefit_freq](images/benefit_pay.png)
 
-This project is your chance to show off your data science prowess with some advanced machine learning algorithms. Now that you've gone through all of the core course content, we're excited to see what you are able to do!
+______________________________________________________
+<p></p><br>
+
+<br>
+<span style="font-size:1.2em;">Limitations of the model:</span><br><br>
+    
+> 1. The built models are relatively simple and, therefore more complex, and ensemble models should be tried and tested.<br>
+    
+>    2. Computational resources are a limiting factor in building and testing more complex models. In such cases, Google Colab or Databricks cloud-based resources should be used. There are other alternatives of cloud resources as well that might be worth exploring.<br>
+    
+>    3. NLP Multiclass classification models could be necessary in some situations, but they perform worse than binary classification models.
+______________________________________________________
+<p></p>
+<br><br>
+<span style="font-size:1.2em;">Suggestion for future improvements:</span><br><br>
+    
+>    1. Convert the dataset to a binary classification dataset by removing the neutral reviews. <br>
+    
+>    2. Another possible strategy is to reduce the original dataset to the records with ratings 1 and 5 only. the argument in favor of that improvement is the most negative and the most positive reviews have the most value for companies; they allow to identify weaknesses and strengths more easily.<br>
+    
+>    3. Use unsupervised clustering techniques to assign classes to the full dataset rather than using rating label<br>
+
+>  4. Explore Theme Extraction and Context Analysis models
+
+<br><br>
+
+## Recommendations
+
+
+1. Test the models built in this project on their internal datasets of employees' open-ended survey answers to a question of their opinion on their group, department, or the company.
+2. Make sure that your internal surveys are strictly anonymous and privacy-proof.
+3. Implement an auto-alert system to identify negative reviews to address existing problems early.
+4. Identification of positive reviews might be a great source of information about groups, departments, and the company's strengths.
+
+<br>
+
+## Footnote: not all of the files needed to run the code (saved datasets and models) were pushed from the local directory; some of them are omitted due to their size and limited space in the repo.
