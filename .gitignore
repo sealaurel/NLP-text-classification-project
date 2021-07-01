@@ -4,7 +4,7 @@
 __pycache__
 *.db
 *.pytest_cache
-**models
-**pickles
-**backups
-data/eda.csv
+**/models
+**/pickles
+
+.data/eda.csv
