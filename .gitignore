@@ -4,7 +4,7 @@
 __pycache__
 *.db
 *.pytest_cache
-**/models
-**/pickles
 
-.data/eda.csv
+**/to_ignore
+**/backup_notebooks
+**/data
